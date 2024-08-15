@@ -312,16 +312,7 @@ const Home = () => {
             />
             <View style={styles.userInfo}>
                 <Text style={styles.userName}>{item.name}</Text>
-                <Text style={styles.userLastMessage}>
-                    {item.lastMessage || ""}
-                </Text>
-                {item.lastMessageTime ? (
-                    <Text style={styles.userLastMessageTime}>
-                        {item.lastMessageTime.toDate().toLocaleTimeString()} {/* Format time as needed */}
-                    </Text>
-                ) : (
-                    <Text>{""}</Text>
-                )}
+                
             </View>
         </TouchableOpacity>
     );
@@ -334,12 +325,7 @@ const Home = () => {
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.userList}
             />
-            <TouchableOpacity
-                onPress={() => navigation.navigate("Chat")}
-                style={styles.chatButton}
-            >
-                <Entypo name="chat" size={24} color={colors.lightGray} />
-            </TouchableOpacity>
+           
         </View>
     );
 };
