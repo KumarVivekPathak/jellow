@@ -8,6 +8,7 @@ import Home from './screens/Home';
 import ChatRoom from './screens/ChatRoom';
 import LoginPage from './screens/LoginPage';
 import SignupPage from './screens/SignupPage';
+// require('dotenv').config();
 
 
 const Stack = createStackNavigator();
