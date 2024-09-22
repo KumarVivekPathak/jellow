@@ -134,7 +134,7 @@
 // });
 
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert } from "react-native";
+import { StyleSheet, Text, View, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, database } from '../config/firebase'; // Ensure you have exported database from your firebase config
@@ -164,7 +164,6 @@ const SignupPage = ({ navigation }) => {
         });
 
         await AsyncStorage.setItem("USERID", user.uid);
-
         console.log('Signup success');
         navigation.navigate("Home");
       } catch (err) {
@@ -176,7 +175,9 @@ const SignupPage = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}>
       <Image source={backImage} style={styles.backImage} />
       <View style={styles.whiteSheet} />
       <SafeAreaView style={styles.form}>
@@ -219,7 +220,7 @@ const SignupPage = ({ navigation }) => {
         </View>
       </SafeAreaView>
       <StatusBar barStyle="light-content" />
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

@@ -245,6 +245,93 @@
 //     },
 // });
 
+// import React, { useEffect, useState } from "react";
+// import {
+//   View,
+//   TouchableOpacity,
+//   Text,
+//   Image,
+//   FlatList,
+//   StyleSheet,
+//   Alert,
+// } from "react-native";
+// import { useNavigation } from "@react-navigation/native";
+// import { FontAwesome, Entypo } from '@expo/vector-icons';
+// import { collection, getDocs, query, where } from "firebase/firestore";
+// import { database } from '../config/firebase';
+// import colors from '../colors';
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+
+
+// const Home = () => {
+//     const navigation = useNavigation();
+//     const [users, setUsers] = useState([]);
+//     let loggedInUserId = "";
+
+//     const fetchUserIdAndUsers = async () => {
+           
+//          loggedInUserId = await AsyncStorage.getItem("USERID");            
+//         const usersCollection = collection(database, 'users');
+//         const q = query(usersCollection, where("userId", "!=", loggedInUserId));
+
+//         try{
+//         const querySnapshot = await getDocs(q);
+//         if (querySnapshot.empty) {
+//             Alert.alert("No Users Found");
+//         } else {
+//             const usersList = querySnapshot.docs.map(doc => ({
+//                 id: doc.id,
+//                 ...doc.data()
+//             }));
+//             setUsers(usersList);
+//         }}catch(error){
+//             console.log("Error fetchng users !")
+//         }
+    
+// };
+
+//     useEffect(() => {
+//         fetchUserIdAndUsers();
+//     }, []);
+
+
+
+//     const handleUserPress = (user) => {
+//         navigation.navigate("Chat", { user : user, id : loggedInUserId});
+//     };
+
+//     const renderUser = ({ item }) => (
+//         <TouchableOpacity
+//             onPress={() => handleUserPress(item)}
+//             style={styles.userItem}
+//         >
+//             <Image
+//                 source={{ uri: item.avatar || 'https://i.pravatar.cc/300' }}
+//                 style={styles.userAvatar}
+//             />
+//             <View style={styles.userInfo}>
+//                 <Text style={styles.userName}>{item.name}</Text>
+                
+//             </View>
+//         </TouchableOpacity>
+//     );
+
+//     return (
+//         <View style={styles.container}>
+//             <FlatList
+//                 data={users}
+//                 renderItem={renderUser}
+//                 keyExtractor={(item) => item.id}
+//                 contentContainerStyle={styles.userList}
+//             />
+           
+//         </View>
+//     );
+// };
+
+// export default Home;
+
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -256,49 +343,54 @@ import {
   Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { FontAwesome, Entypo } from '@expo/vector-icons';
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { database } from '../config/firebase';
+import { auth, database } from '../config/firebase';
 import colors from '../colors';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const cowImage = "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pinterest.com%2Fpin%2F320107485984677497%2F&psig=AOvVaw2Mi-87GNdfZPz8xUO5ai06&ust=1723754964225000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCPDogu2t9YcDFQAAAAAdAAAAABAE";
 
 const Home = () => {
     const navigation = useNavigation();
     const [users, setUsers] = useState([]);
-    let loggedInUserId = "";
+    const [loggedInUserId, setLoggedInUserId] = useState("");
 
     const fetchUserIdAndUsers = async () => {
-           
-         loggedInUserId = await AsyncStorage.getItem("USERID");            
-        const usersCollection = collection(database, 'users');
-        const q = query(usersCollection, where("userId", "!=", loggedInUserId));
+        try {
+            const user = auth.currentUser;
+            if (!user) {
+                throw new Error("User not authenticated");
+            }
+            const userId = user.uid;
+            setLoggedInUserId(userId);
 
-        try{
-        const querySnapshot = await getDocs(q);
-        if (querySnapshot.empty) {
-            Alert.alert("No Users Found");
-        } else {
-            const usersList = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            setUsers(usersList);
-        }}catch(error){
-            console.log("Error fetchng users !")
+            const usersCollection = collection(database, 'users');
+            const q = query(usersCollection, where("userId", "!=", userId));
+
+            const querySnapshot = await getDocs(q);
+            if (querySnapshot.empty) {
+                Alert.alert("No Users Found", "There are no other users to display.");
+            } else {
+                const usersList = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                setUsers(usersList);
+            }
+        } catch (error) {
+            console.error("Error fetching users:", error);
+            if (error.code === 'permission-denied') {
+                Alert.alert("Access Denied", "You don't have permission to access this data. Please check your Firebase security rules.");
+            } else {
+                Alert.alert("Error", "Failed to fetch users. Please try again later.");
+            }
         }
-    
-};
+    };
 
     useEffect(() => {
         fetchUserIdAndUsers();
     }, []);
 
-
-
     const handleUserPress = (user) => {
-        navigation.navigate("Chat", { user : user, id : loggedInUserId});
+        navigation.navigate("Chat", { user: user, id: loggedInUserId });
     };
 
     const renderUser = ({ item }) => (
@@ -312,7 +404,6 @@ const Home = () => {
             />
             <View style={styles.userInfo}>
                 <Text style={styles.userName}>{item.name}</Text>
-                
             </View>
         </TouchableOpacity>
     );
@@ -325,7 +416,6 @@ const Home = () => {
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.userList}
             />
-           
         </View>
     );
 };

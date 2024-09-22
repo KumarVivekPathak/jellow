@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert } from "react-native";
+import { StyleSheet, Text, View, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import backImage from '../assets/backImage.png';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
@@ -16,8 +16,7 @@ const LoginPage = ({ navigation }) => {
         const user = userCredential.user;
 
         const userId = user.uid;
-              await AsyncStorage.setItem('USERID', userId);
-
+        await AsyncStorage.setItem('USERID', userId);
         navigation.navigate("Home");
       } catch (err) {
         Alert.alert("Login error", err.message);
@@ -28,7 +27,11 @@ const LoginPage = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+     style={styles.container}
+     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+     keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
+     >
       <Image source={backImage} style={styles.backImage} />
       <View style={styles.whiteSheet} />
       <SafeAreaView style={styles.form}>
@@ -64,7 +67,7 @@ const LoginPage = ({ navigation }) => {
         </View>
       </SafeAreaView>
       <StatusBar barStyle="light-content" />
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -80,6 +83,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: "orange",
     alignSelf: "center",
+    paddingTop:10,
     paddingBottom: 24,
   },
   input: {
